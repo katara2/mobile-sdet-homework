@@ -1,0 +1,228 @@
+const { remote } = require('webdriverio');
+
+(async () => {
+  const driver = await remote({
+    path: '/wd/hub',
+    port: 4723,
+    capabilities: {
+      platformName: 'Android',
+      platformVersion: '<ANDROID_VERSION>',
+      deviceName: '<DEVICE_NAME>',
+      appPackage: '<APP_PACKAGE>',
+      appActivity: '<APP_ACTIVITY>',
+    },
+  });
+
+  try {
+    // Open the Nenno's Pizza application
+    await driver.startActivity({
+      appPackage: '<APP_PACKAGE>',
+      appActivity: '<APP_ACTIVITY>',
+    });
+
+    // Check if the Nenno's Pizza title appears on the main page
+    const titleElement = await driver.$('~nenno_pizza_title');
+    const titleText = await titleElement.getText();
+    console.log('Title:', titleText);
+
+    // Check if the title/contents/price of the Ricci pizza appears on the main page
+    const ricciPizzaTitleElement = await driver.$('~ricci_pizza_title');
+    const ricciPizzaTitleText = await ricciPizzaTitleElement.getText();
+    console.log('Ricci Pizza Title:', ricciPizzaTitleText);
+
+    // Select Ricci pizza
+    await ricciPizzaTitleElement.click();
+
+    // Check if the name of the selected pizza / picture of the selected pizza and the Ingredients title appears on the page
+    const selectedPizzaNameElement = await driver.$('~selected_pizza_name');
+    const selectedPizzaNameText = await selectedPizzaNameElement.getText();
+    console.log('Selected Pizza Name:', selectedPizzaNameText);
+
+    const selectedPizzaImageElement = await driver.$('~selected_pizza_image');
+    const isImageDisplayed = await selectedPizzaImageElement.isDisplayed();
+    console.log('Selected Pizza Image Displayed:', isImageDisplayed);
+
+    const ingredientsTitleElement = await driver.$('~ingredients_title');
+    const ingredientsTitleText = await ingredientsTitleElement.getText();
+    console.log('Ingredients Title:', ingredientsTitleText);
+
+    // Check if the Mozzarella and Ricci ingredients are checked in the list
+    const mozzarellaIngredientCheckbox = await driver.$('~mozzarella_ingredient_checkbox');
+    const isMozzarellaChecked = await mozzarellaIngredientCheckbox.isSelected();
+    console.log('Mozzarella Ingredient Checked:', isMozzarellaChecked);
+
+    const ricciIngredientCheckbox = await driver.$('~ricci_ingredient_checkbox');
+    const isRicciChecked = await ricciIngredientCheckbox.isSelected();
+    console.log('Ricci Ingredient Checked:', isRicciChecked);
+
+    // Add the pizza to the cart
+    const addToCartButton = await driver.$('~add_to_cart_button');
+    await addToCartButton.click();
+
+    // Navigate back to the main page
+    await driver.back();
+
+    // Check if the "1" appears next to the cart icon
+    const cartCountElement = await driver.$('~cart_count');
+    const cartCountText = await cartCountElement.getText();
+    console.log('Cart Count:', cartCountText);
+
+    // Open the cart and check if the selected pizza with its price appears in the cart
+    const cartIcon = await driver.$('~cart_icon');
+    await cartIcon.click();
+
+    const cartItems = await driver.$$('~cart_item');
+    console.log('Cart Items:', cartItems.length);
+
+    // Delete the pizza from the cart and check if it disappears
+    const deleteButton = await driver.$('~delete_button');
+    await deleteButton.click();
+
+    const isCartItemDisplayed = await driver.isElementDisplayed('~cart_item');
+    console.log('Is Cart Item Displayed:', isCartItemDisplayed);
+
+    // Navigate back to the
+
+
+
+import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.MobileBy;
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.android.AndroidDriver;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.URL;
+
+public class NennoPizzaAppTest {
+    private static AppiumDriver<MobileElement> driver;
+
+    public static void main(String[] args) {
+        try {
+            openNennosPizzaApp();
+            createCustomPizza();
+            addToCart();
+            checkOutPizza();
+            navigateToMainPage();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (driver != null) {
+                driver.quit();
+            }
+        }
+    }
+
+    public static void openNennosPizzaApp() throws Exception {
+        DesiredCapabilities caps = new DesiredCapabilities();
+        caps.setCapability("deviceName", "Your_Device_Name");
+        caps.setCapability("platformName", "Android");
+        caps.setCapability("platformVersion", "Android_Version");
+        caps.setCapability("appPackage", "com.nennos.pizza");
+        caps.setCapability("appActivity", "com.nennos.pizza.SplashActivity");
+        caps.setCapability("noReset", "true");
+
+        URL appiumServerURL = new URL("http://localhost:4723/wd/hub");
+        driver = new AndroidDriver<>(appiumServerURL, caps);
+    }
+
+    public static void createCustomPizza() {
+        // Find and click on the "+" button
+        MobileElement plusButton = driver.findElement(MobileBy.id("com.nennos.pizza:id/btnAddPizza"));
+        plusButton.click();
+
+        // Add Salami to the pizza
+        MobileElement salamiOption = driver.findElement(MobileBy.id("com.nennos.pizza:id/btnIngredient1"));
+        salamiOption.click();
+
+        // Add Mushroom to the pizza
+        MobileElement mushroomOption = driver.findElement(MobileBy.id("com.nennos.pizza:id/btnIngredient2"));
+        mushroomOption.click();
+
+        // Add Ricci to the pizza
+        MobileElement ricciOption = driver.findElement(MobileBy.id("com.nennos.pizza:id/btnIngredient3"));
+        ricciOption.click();
+    }
+
+    public static void addToCart() {
+        // Check if the price of the custom pizza appears on the page
+        MobileElement priceElement = driver.findElement(MobileBy.id("com.nennos.pizza:id/txtPrice"));
+        String price = priceElement.getText();
+        System.out.println("Custom Pizza Price: " + price);
+
+        // Add the pizza to the cart
+        MobileElement addToCartButton = driver.findElement(MobileBy.id("com.nennos.pizza:id/btnAddToCart"));
+        addToCartButton.click();
+    }
+
+    public static void checkOutPizza() {
+        // Check if "Thank for your order" appears on the page
+        MobileElement thankYouMessage = driver.findElement(MobileBy.id("com.nennos.pizza:id/txtThankYou"));
+        String message = thankYouMessage.getText();
+        System.out.println("Thank You Message: " + message);
+    }
+
+    public static void navigateToMainPage() {
+        // Navigate back to the main page
+        MobileElement backButton = driver.findElement(MobileBy.className("android.widget.ImageButton"));
+        backButton.click();
+    }
+}
+
+import io.appium.java_client.MobileElement;
+import io.appium.java_client.android.AndroidDriver;
+import io.appium.java_client.remote.MobileCapabilityType;
+import org.openqa.selenium.By;
+import org.openqa.selenium.remote.DesiredCapabilities;
+import java.net.URL;
+
+public class NennosPizzaAppTest {
+
+    public static void main(String[] args) {
+        // Set the desired capabilities for the Nenno's Pizza application
+        DesiredCapabilities caps = new DesiredCapabilities();
+        caps.setCapability(MobileCapabilityType.PLATFORM_NAME, "Android");
+        caps.setCapability(MobileCapabilityType.VERSION, "9.0");
+        caps.setCapability(MobileCapabilityType.DEVICE_NAME, "device_name");
+        caps.setCapability("appPackage", "com.nennos.pizzaapp");
+        caps.setCapability("appActivity", "com.nennos.pizzaapp.MainActivity");
+
+        // Set the Appium server URL
+        URL appiumServerURL;
+        try {
+            appiumServerURL = new URL("http://localhost:4723/wd/hub");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return;
+        }
+
+        // Create an instance of the Appium driver
+        AndroidDriver<MobileElement> driver = new AndroidDriver<>(appiumServerURL, caps);
+
+        // Open the Nenno's Pizza application
+        driver.launchApp();
+
+        // Open the cart
+        driver.findElement(By.id("cartButton")).click();
+
+        // Open the Drinks menu
+        driver.findElement(By.id("drinksMenu")).click();
+
+        // Add a beer from the menu
+        driver.findElement(By.xpath("//android.widget.TextView[@text='Beer']")).click();
+
+        // Go back to the cart
+        driver.findElement(By.id("backButton")).click();
+
+        // Check if the beer appears in the cart
+        boolean isBeerInCart = driver.findElement(By.xpath("//android.widget.TextView[@text='Beer']"))
+                .isDisplayed();
+        System.out.println("Is beer in cart? " + isBeerInCart);
+
+        // Delete the beer and go back to the main page
+        driver.findElement(By.xpath("//android.widget.TextView[@text='Beer']/following-sibling::" +
+                "android.widget.ImageButton")).click();
+        driver.findElement(By.id("backButton")).click();
+
+        // Close the application
+        driver.closeApp();
+    }
+}
